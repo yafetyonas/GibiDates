@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - All Profiles & Chats</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .profiles-list, .chats-list {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            margin-top: 20px;
+        }
+        .profile-item, .chat-item {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            background: #f9f9f9;
+            position: relative;
+        }
+        .profile-item h3, .chat-item h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .profile-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .profile-info p, .chat-info p {
+            margin: 5px 0;
+        }
+        .admin-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .stats-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .stats-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        .stats-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .remove-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .remove-btn:hover {
+            background: #c0392b;
+        }
+        .likes-info, .password-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .admin-nav {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .admin-nav a {
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+        .admin-nav a:hover {
+            background: var(--secondary-color);
+        }
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 3px solid var(--primary-color);
+            background: white;
+        }
+        .message.sent {
+            border-left-color: #27ae60;
+        }
+        .message.received {
+            border-left-color: #e74c3c;
+        }
+        .message-sender {
+            font-weight: bold;
+            color: #333;
+        }
+        .message-time {
+            font-size: 12px;
+            color: #666;
+            margin-left: 10px;
+        }
+        .chat-participants {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #e8f4fd;
+            border-radius: 5px;
+        }
+        .participant {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .participant img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+        }
+        .password-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        .security-warning {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <div class="logo">GibiDates - Admin</div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Login</a>
+                <a href="admin.html" class="nav-link active">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-container">
+        <h1>Admin Panel - Complete System Access</h1>
+        
+        <!-- Security Warning -->
+        <div class="security-warning">
+            <strong>⚠️ Security Notice:</strong> This admin panel shows sensitive information including passwords. 
+            Keep this page secure and do not share access.
+        </div>
+
+        <!-- Admin Navigation -->
+        <div class="admin-nav">
+            <a href="index.html">Go to Login</a>
+            <a href="#" onclick="clearAllData()">Clear All Data</a>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-card">
+            <div class="stats-number" id="total-profiles">0</div>
+            <div class="stats-label">Total Profiles</div>
+            <div style="margin-top: 10px; font-size: 14px; color: #666;">
+                <span id="total-chats">0</span> Chats • <span id="total-matches">0</span> Matches • <span id="total-likes">0</span> Likes
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="showTab('profiles')">Profiles & Passwords</button>
+            <button class="tab-btn" onclick="showTab('chats')">All Chats</button>
+            <button class="tab-btn" onclick="showTab('matches')">Matches & Likes</button>
+        </div>
+
+        <!-- Profiles Tab -->
+        <div id="profiles-tab" class="tab-content active">
+            <div class="admin-actions">
+                <button class="btn" id="download-txt-btn">Download Profiles as Text File</button>
+                <button class="btn" id="download-json-btn">Download Profiles as JSON</button>
+                <button class="btn btn-danger" id="clear-all-btn">Clear All Data</button>
+            </div>
+
+            <div class="profiles-list" id="profiles-list">
+                <!-- Profiles will be dynamically generated -->
+            </div>
+        </div>
+
+        <!-- Chats Tab -->
+        <div id="chats-tab" class="tab-content">
+            <div class="chats-list" id="chats-list">
+                <!-- Chats will be dynamically generated -->
+            </div>
+        </div>
+
+        <!-- Matches Tab -->
+        <div id="matches-tab" class="tab-content">
+            <div class="profiles-list" id="matches-list">
+                <!-- Matches and likes will be dynamically generated -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'profiles';
+
+        // Show specific tab
+        function showTab(tabName) {
+            currentTab = tabName;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.tab-btn[onclick="showTab('${tabName}')"]`).classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        // Get user info by ID
+        function getUserById(userId) {
+            const profiles = JSON.parse(localStorage.getItem('habeshaProfiles') || '[]');
+            const users = JSON.parse(localStorage.getItem('habeshaUsers') || '[]');
+            
+            const profile = profiles.find(p => p.id === userId);
+            const user = users.find(u => u.id === userId);
+            
+            return { profile, user };
+        }
+
+        // Get like count for a profile
+        function getLikeCount(profileId) {
+            const likes = JSON.parse(localStorage.getItem('habeshaLikes') || '{}');
+            let count = 0;
+            
+            Object.values(likes).forEach(userLikes => {
+                if (userLikes.includes(profileId)) {
+                    count++;
+                }
+            });
+            
+            return count;
+        }
+
+        // Get total statistics
+        function getTotalStats() {
+            const profiles = JSON.parse(localStorage.getItem('habeshaProfiles') || '[]');
+            const chats = JSON.parse(localStorage.getItem('habeshaChats') || '{}');
+            const matches = JSON.parse(localStorage.getItem('habeshaMatches') || '{}');
+            const likes = JSON.parse(localStorage.getItem('habeshaLikes') || '{}');
+            
+            let totalLikes = 0;
+            Object.values(likes).forEach(userLikes => {
+                totalLikes += userLikes.length;
+            });
+            
+            return {
+                profiles: profiles.length,
+                chats: Object.keys(chats).length,
+                matches: Object.keys(matches).length,
+                likes: totalLikes
+            };
+        }
+
+        // Remove a specific account
+        function removeAccount(profileId) {
+            if (confirm('Are you sure you want to remove this account? This action cannot be undone!')) {
+                // Remove user from habeshaUsers
+                const users = JSON.parse(localStorage.getItem('habeshaUsers') || '[]');
+                const updatedUsers = users.filter(user => user.id !== profileId);
+                localStorage.setItem('habeshaUsers', JSON.stringify(updatedUsers));
+                
+                // Remove user from habeshaProfiles
+                const profiles = JSON.parse(localStorage.getItem('habeshaProfiles') || '[]');
+                const updatedProfiles = profiles.filter(profile => profile.id !== profileId);
+                localStorage.setItem('habeshaProfiles', JSON.stringify(updatedProfiles));
+                
+                // Remove user from likes data
+                const allLikes = JSON.parse(localStorage.getItem('habeshaLikes') || '{}');
+                delete allLikes[profileId]; // Remove as liker
+                // Remove from others' likes
+                Object.keys(allLikes).forEach(userId => {
+                    const userLikes = allLikes[userId];
+                    const likeIndex = userLikes.indexOf(profileId);
+                    if (likeIndex > -1) {
+                        userLikes.splice(likeIndex, 1);
+                    }
+                });
+                localStorage.setItem('habeshaLikes', JSON.stringify(allLikes));
+                
+                // Remove from matches
+                const matches = JSON.parse(localStorage.getItem('habeshaMatches') || '{}');
+                Object.keys(matches).forEach(matchId => {
+                    if (matches[matchId].users.includes(profileId)) {
+                        delete matches[matchId];
+                    }
+                });
+                localStorage.setItem('habeshaMatches', JSON.stringify(matches));
+                
+                // Remove from chats
+                const chats = JSON.parse(localStorage.getItem('habeshaChats') || '{}');
+                Object.keys(chats).forEach(chatId => {
+                    if (chats[chatId].users.includes(profileId)) {
+                        delete chats[chatId];
+                    }
+                });
+                localStorage.setItem('habeshaChats', JSON.stringify(chats));
+                
+                alert('Account removed successfully!');
+                loadAllData(); // Reload all data
+            }
+        }
+
+        // Clear all data
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear ALL data? This cannot be undone!')) {
+                localStorage.clear();
+                alert('All data cleared successfully!');
+                loadAllData(); // Reload to show empty state
+            }
+        }
+
+        // Load profiles with passwords
+        function loadProfiles() {
+            const profiles = JSON.parse(localStorage.getItem('habeshaProfiles') || '[]');
+            const users = JSON.parse(localStorage.getItem('habeshaUsers') || '[]');
+            const profilesList = document.getElementById('profiles-list');
+            
+            if (profiles.length === 0) {
+                profilesList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <h3>No profiles found</h3>
+                        <p>No user profiles have been created yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `<h2>User Accounts (${profiles.length})</h2>`;
+            
+            profiles.forEach((profile, index) => {
+                const userAccount = users.find(u => u.id === profile.id);
+                const likeCount = getLikeCount(profile.id);
+                const password = userAccount ? userAccount.password : 'N/A';
+                
+                html += `
+                    <div class="profile-item">
+                        <button class="remove-btn" onclick="removeAccount(${profile.id})">Remove</button>
+                        <h3>Account #${index + 1} - ${profile.username}</h3>
+                        <div class="profile-info">
+                            <div>
+                                <p><strong>Email:</strong> ${profile.email || 'N/A'}</p>
+                                <p><strong>Age:</strong> ${profile.age}</p>
+                                <p><strong>Sex:</strong> ${profile.sex}</p>
+                                <p><strong>Religion:</strong> ${profile.religion}</p>
+                            </div>
+                            <div>
+                                <p><strong>Interests:</strong> ${profile.interests.join(', ')}</p>
+                                <p><strong>Created:</strong> ${new Date(profile.createdAt).toLocaleString()}</p>
+                                <p><strong>Last Updated:</strong> ${new Date(profile.updatedAt).toLocaleString()}</p>
+                                <p><strong>ID:</strong> ${profile.id}</p>
+                            </div>
+                        </div>
+                        <p><strong>Bio:</strong> ${profile.bio}</p>
+                        <div class="password-info">
+                            <strong>🔐 Password:</strong> ${password}
+                        </div>
+                        <div class="likes-info">
+                            <strong>Likes:</strong> ${likeCount} ${likeCount === 1 ? 'like' : 'likes'}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            profilesList.innerHTML = html;
+        }
+
+        // Load all chats
+        function loadChats() {
+            const chats = JSON.parse(localStorage.getItem('habeshaChats') || '{}');
+            const chatsList = document.getElementById('chats-list');
+            
+            const chatEntries = Object.entries(chats);
+            
+            if (chatEntries.length === 0) {
+                chatsList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <h3>No chats found</h3>
+                        <p>No conversations have been started yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `<h2>All Chats (${chatEntries.length})</h2>`;
+            
+            chatEntries.forEach(([chatId, chat], index) => {
+                const user1 = getUserById(chat.users[0]);
+                const user2 = getUserById(chat.users[1]);
+                
+                html += `
+                    <div class="chat-item">
+                        <h3>Chat #${index + 1} - ${chatId}</h3>
+                        <div class="chat-participants">
+                            <div class="participant">
+                                <img src="${user1.profile?.photo || ''}" alt="${user1.profile?.username}">
+                                <span><strong>${user1.profile?.username || 'Unknown User'}</strong> (ID: ${chat.users[0]})</span>
+                            </div>
+                            <div class="participant">
+                                <img src="${user2.profile?.photo || ''}" alt="${user2.profile?.username}">
+                                <span><strong>${user2.profile?.username || 'Unknown User'}</strong> (ID: ${chat.users[1]})</span>
+                            </div>
+                        </div>
+                        <p><strong>Created:</strong> ${new Date(chat.createdAt).toLocaleString()}</p>
+                        <p><strong>Last Activity:</strong> ${new Date(chat.updatedAt).toLocaleString()}</p>
+                        <p><strong>Total Messages:</strong> ${chat.messages.length}</p>
+                        
+                        <div style="margin-top: 15px;">
+                            <h4>Messages:</h4>
+                `;
+                
+                if (chat.messages.length === 0) {
+                    html += `<p style="color: #666; font-style: italic;">No messages yet</p>`;
+                } else {
+                    chat.messages.forEach(message => {
+                        const sender = getUserById(message.senderId);
+                        const isSent = message.senderId === chat.users[0];
+                        html += `
+                            <div class="message ${isSent ? 'sent' : 'received'}">
+                                <span class="message-sender">${sender.profile?.username || 'Unknown'}:</span>
+                                ${message.text}
+                                <span class="message-time">${new Date(message.timestamp).toLocaleTimeString()}</span>
+                            </div>
+                        `;
+                    });
+                }
+                
+                html += `</div></div>`;
+            });
+            
+            chatsList.innerHTML = html;
+        }
+
+        // Load matches and likes
+        function loadMatches() {
+            const matches = JSON.parse(localStorage.getItem('habeshaMatches') || '{}');
+            const likes = JSON.parse(localStorage.getItem('habeshaLikes') || '{}');
+            const matchesList = document.getElementById('matches-list');
+            
+            const matchEntries = Object.entries(matches);
+            const likeEntries = Object.entries(likes);
+            
+            let html = `<h2>Matches & Likes</h2>`;
+            
+            // Matches section
+            html += `<h3>Matches (${matchEntries.length})</h3>`;
+            if (matchEntries.length === 0) {
+                html += `<p style="color: #666;">No matches found</p>`;
+            } else {
+                matchEntries.forEach(([matchId, match], index) => {
+                    const user1 = getUserById(match.users[0]);
+                    const user2 = getUserById(match.users[1]);
+                    
+                    html += `
+                        <div class="profile-item">
+                            <h4>Match #${index + 1}</h4>
+                            <div class="profile-info">
+                                <div>
+                                    <p><strong>User 1:</strong> ${user1.profile?.username || 'Unknown'} (ID: ${match.users[0]})</p>
+                                    <p><strong>User 2:</strong> ${user2.profile?.username || 'Unknown'} (ID: ${match.users[1]})</p>
+                                </div>
+                                <div>
+                                    <p><strong>Matched:</strong> ${new Date(match.createdAt).toLocaleString()}</p>
+                                    <p><strong>Match ID:</strong> ${matchId}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            // Likes section
+            html += `<h3 style="margin-top: 30px;">Likes Data</h3>`;
+            if (likeEntries.length === 0) {
+                html += `<p style="color: #666;">No likes data found</p>`;
+            } else {
+                html += `<p>Total users who liked: ${likeEntries.length}</p>`;
+                likeEntries.forEach(([userId, userLikes]) => {
+                    const user = getUserById(parseInt(userId));
+                    html += `
+                        <div class="profile-item">
+                            <h4>${user.profile?.username || 'Unknown User'} (ID: ${userId})</h4>
+                            <p><strong>Liked profiles:</strong> ${userLikes.length} profiles</p>
+                            <p><strong>Profile IDs liked:</strong> ${userLikes.join(', ') || 'None'}</p>
+                        </div>
+                    `;
+                });
+            }
+            
+            matchesList.innerHTML = html;
+        }
+
+        // Download as text file
+        document.getElementById('download-txt-btn').addEventListener('click', () => {
+            const profiles = JSON.parse(localStorage.getItem('habeshaProfiles') || '[]');
+            const users = JSON.parse(localStorage.getItem('habeshaUsers') || '[]');
+            
+            let textContent = `HABESHA DATING - COMPLETE DATA EXPORT\n`;
+            textContent += `Generated on: ${new Date().toLocaleString()}\n`;
+            textContent += `Total Profiles: ${profiles.length}\n`;
+            textContent += `========================================\n\n`;
+            
+            profiles.forEach((profile, index) => {
+                const userAccount = users.find(u => u.id === profile.id);
+                const password = userAccount ? userAccount.password : 'N/A';
+                const likeCount = getLikeCount(profile.id);
+                
+                textContent += `ACCOUNT #${index + 1}\n`;
+                textContent += `===============\n`;
+                textContent += `Username: ${profile.username}\n`;
+                textContent += `Email: ${profile.email || 'N/A'}\n`;
+                textContent += `Password: ${password}\n`;
+                textContent += `Age: ${profile.age}\n`;
+                textContent += `Sex: ${profile.sex}\n`;
+                textContent += `Religion: ${profile.religion}\n`;
+                textContent += `Bio: ${profile.bio}\n`;
+                textContent += `Interests: ${profile.interests.join(', ')}\n`;
+                textContent += `Likes: ${likeCount}\n`;
+                textContent += `Profile Created: ${new Date(profile.createdAt).toLocaleString()}\n`;
+                textContent += `Last Updated: ${new Date(profile.updatedAt).toLocaleString()}\n`;
+                textContent += `Profile ID: ${profile.id}\n`;
+                textContent += `\n----------------------------------------\n\n`;
+            });
+            
+            const blob = new Blob([textContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `habesha_dating_complete_data_${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        });
+
+        // Download as JSON
+        document.getElementById('download-json-btn').addEventListener('click', () => {
+            const exportData = {
+                exportedAt: new Date().toISOString(),
+                users: JSON.parse(localStorage.getItem('habeshaUsers') || '[]'),
+                profiles: JSON.parse(localStorage.getItem('habeshaProfiles') || '[]'),
+                likesData: JSON.parse(localStorage.getItem('habeshaLikes') || '{}'),
+                matchesData: JSON.parse(localStorage.getItem('habeshaMatches') || '{}'),
+                chatsData: JSON.parse(localStorage.getItem('habeshaChats') || '{}')
+            };
+
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `habesha_dating_complete_export_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        });
+
+        // Clear all data button
+        document.getElementById('clear-all-btn').addEventListener('click', clearAllData);
+
+        // Load all data
+        function loadAllData() {
+            const stats = getTotalStats();
+            document.getElementById('total-profiles').textContent = stats.profiles;
+            document.getElementById('total-chats').textContent = stats.chats;
+            document.getElementById('total-matches').textContent = stats.matches;
+            document.getElementById('total-likes').textContent = stats.likes;
+            
+            loadProfiles();
+            loadChats();
+            loadMatches();
+        }
+
+        // Load all data on page load
+        document.addEventListener('DOMContentLoaded', loadAllData);
+    </script>
+</body>
+</html>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habesha Dating - Login</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .mandatory-consent-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            color: white;
+        }
+        .consent-container {
+            background: white;
+            color: #333;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .consent-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .consent-header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .consent-requirements {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .consent-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .consent-item i {
+            color: var(--primary-color);
+            margin-right: 15px;
+            margin-top: 2px;
+            font-size: 20px;
+        }
+        .consent-warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .consent-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        .btn-accept {
+            background: #27ae60;
+            color: white;
+        }
+        .btn-accept:hover {
+            background: #219a52;
+        }
+        .btn-decline {
+            background: #e74c3c;
+            color: white;
+        }
+        .btn-decline:hover {
+            background: #c0392b;
+        }
+        .access-blocked {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            margin: 100px auto;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="container" id="login-container">
+            <div class="form-box login">
+                <form id="login-form">
+                    <h1>Login</h1>
+                    <div class="input-box">
+                        <input type="text" placeholder="Username" required id="login-username">
+                        <i class='bx bxs-user'></i>
+                    </div>
+                    <div class="input-box">     
+                        <input type="password" placeholder="Password" required id="login-password">
+                        <i class='bx bxs-lock-alt'></i>
+                    </div>
+                    <div class="forgot-link">
+                        <a href="#">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="btn">Login</button>
+                    <p>Or login with social platforms</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="bx bxl-google"></i></a>
+                        <a href="#"><i class="bx bxl-facebook"></i></a>
+                        <a href="#"><i class="bx bxl-apple"></i></a>
+                    </div>
+                </form>
+            </div>
+            <div class="form-box register">
+                <form id="register-form">
+                    <h1>Registration</h1>
+                    <div class="input-box">
+                        <input type="text" placeholder="Username" required id="register-username">
+                        <i class='bx bxs-user'></i>
+                    </div>
+                    <div class="input-box">
+                        <input type="email" placeholder="Email" required id="register-email">
+                        <i class='bx bxs-envelope'></i>
+                    </div>
+                    <div class="input-box">     
+                        <input type="password" placeholder="Password" required id="register-password">
+                        <i class='bx bxs-lock-alt'></i>
+                    </div>
+                    <div class="input-box">     
+                        <input type="password" placeholder="Confirm Password" required id="register-confirm-password">
+                        <i class='bx bxs-lock-alt'></i>
+                    </div>
+                    <button type="submit" class="btn">Register</button>
+                    <p>Or register with social platforms</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="bx bxl-google"></i></a>
+                        <a href="#"><i class="bx bxl-facebook"></i></a>
+                        <a href="#"><i class="bx bxl-apple"></i></a>
+                    </div>
+                </form>
+            </div>
+            <div class="toggle-box">
+                <div class="toggle-panel toggle-left">
+                    <h1>Hello, Welcome!</h1>
+                    <p>Don't have an account?</p>
+                    <button class="btn register-btn">Register</button>
+                </div>
+                <div class="toggle-panel toggle-right">
+                    <h1>Welcome Back!</h1>
+                    <p>Already have an account?</p>
+                    <button class="btn login-btn">Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mandatory Consent Modal -->
+    <div id="mandatory-consent-modal" class="mandatory-consent-modal" style="display: none;">
+        <div class="consent-container">
+            <div class="consent-header">
+                <h1>🔒 Mandatory Data Access Consent</h1>
+                <p>Access to GibiDates requires your explicit consent</p>
+            </div>
+
+            <div class="consent-warning">
+                <h3>⚠️ ACCESS RESTRICTED UNTIL CONSENT GIVEN</h3>
+                <p>You cannot use this website without granting the required consents below.</p>
+            </div>
+
+            <div class="consent-requirements">
+                <h3>Required Consents for Platform Access:</h3>
+                
+                <div class="consent-item">
+                    <i class='bx bx-shield-quarter'></i>
+                    <div>
+                        <h4>Administrator Chat Monitoring</h4>
+                        <p>I understand and consent that administrators may access and monitor all chat conversations for safety, moderation, and legal compliance purposes.</p>
+                    </div>
+                </div>
+
+                <div class="consent-item">
+                    <i class='bx bx-data'></i>
+                    <div>
+                        <h4>Full Profile Data Access</h4>
+                        <p>I consent to administrators accessing my complete profile data including photos, personal information, interests, and matching history.</p>
+                    </div>
+                </div>
+
+                <div class="consent-item">
+                    <i class='bx bx-check-shield'></i>
+                    <div>
+                        <h4>Privacy Policy Agreement</h4>
+                        <p>I have read and agree to the <a href="privacy-policy.html" target="_blank" style="color: var(--primary-color);">Privacy Policy</a> including all data usage terms.</p>
+                    </div>
+                </div>
+
+                <div class="consent-item">
+                    <i class='bx bx-calendar-check'></i>
+                    <div>
+                        <h4>Continuous Monitoring Consent</h4>
+                        <p>I understand this consent is ongoing and applies to all current and future data generated on the platform.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="consent-warning">
+                <p><strong>Note:</strong> Declining these consents will prevent you from accessing Habesha Dating. These consents are mandatory for platform usage.</p>
+            </div>
+
+            <div class="consent-actions">
+                <button class="btn btn-accept" id="accept-all-consent">
+                    <i class='bx bx-check-circle'></i> I Consent & Accept All
+                </button>
+                <button class="btn btn-decline" id="decline-consent">
+                    <i class='bx bx-x-circle'></i> Decline & Exit
+                </button>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #666;">
+                <p>By accepting, you acknowledge all data access terms are required for platform access</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const container = document.querySelector('.container');
+        const registerBtn = document.querySelector('.register-btn');
+        const loginBtn = document.querySelector('.login-btn');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const consentModal = document.getElementById('mandatory-consent-modal');
+
+        // Check if user needs to give consent
+        function checkUserConsent(user) {
+            if (!user) return false;
+            
+            // Check if user has given all required consents
+            return user.consentGiven && 
+                   user.consentItems && 
+                   user.consentItems.chatMonitoring && 
+                   user.consentItems.dataAccess && 
+                   user.consentItems.privacyPolicy;
+        }
+
+        // Show mandatory consent modal
+        function showMandatoryConsent(userData, isNewUser = false) {
+            consentModal.style.display = 'flex';
+            
+            document.getElementById('accept-all-consent').onclick = function() {
+                grantFullConsent(userData, isNewUser);
+            };
+            
+            document.getElementById('decline-consent').onclick = function() {
+                if (isNewUser) {
+                    // Remove the new user if they decline
+                    const users = JSON.parse(localStorage.getItem('habeshaUsers') || '[]');
+                    const updatedUsers = users.filter(u => u.id !== userData.id);
+                    localStorage.setItem('habeshaUsers', JSON.stringify(updatedUsers));
+                }
+                localStorage.removeItem('currentUser');
+                alert('Access to Habesha Dating requires consent. You cannot use the platform without granting the required permissions.');
+                window.location.href = 'index.html';
+            };
+        }
+
+        // Grant full consent and proceed
+        function grantFullConsent(userData, isNewUser = false) {
+            const users = JSON.parse(localStorage.getItem('habeshaUsers') || '[]');
+            let userIndex = users.findIndex(u => u.id === userData.id);
+            
+            if (userIndex === -1 && isNewUser) {
+                // Add new user with consent
+                users.push({
+                    ...userData,
+                    consentGiven: true,
+                    consentDate: new Date().toISOString(),
+                    privacyAcknowledged: true,
+                    consentItems: {
+                        chatMonitoring: true,
+                        dataAccess: true,
+                        privacyPolicy: true,
+                        continuousMonitoring: true
+                    }
+                });
+            } else if (userIndex !== -1) {
+                // Update existing user with consent
+                users[userIndex] = {
+                    ...users[userIndex],
+                    consentGiven: true,
+                    consentDate: new Date().toISOString(),
+                    privacyAcknowledged: true,
+                    consentItems: {
+                        chatMonitoring: true,
+                        dataAccess: true,
+                        privacyPolicy: true,
+                        continuousMonitoring: true
+                    }
+                };
+            }
+            
+            localStorage.setItem('habeshaUsers', JSON.stringify(users));
+            
+            // Update current user
+            const currentUser = {
+                ...userData,
+                consentGiven: true,
+                consentDate: new Date().toISOString(),
+                privacyAcknowledged: true,
+                consentItems: {
+                    chatMonitoring: true,
+                    dataAccess: true,
+                    privacyPolicy: true,
+                    continuousMonitoring: true
+                }
+            };
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            consentModal.style.display = 'none';
+            
+            if (isNewUser || !userData.profileCompleted) {
+                window.location.href = 'profile-setup.html';
+            } else {
+                window.location.href = 'home.html';
+            }
+        }
+
+        // Login/Register toggle
+        registerBtn.addEventListener("click", () => {
+            container.classList.add('active');
+        });
+        
+        loginBtn.addEventListener("click", () => {
+            container.classList.remove('active');
+        });
+
+        // Login form submission
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (username && password) {
+                // Check if user exists
+                const users = JSON.parse(localStorage.getItem('habeshaUsers') || '[]');
+                const user = users.find(u => u.username === username && u.password === password);
+                
+                if (user) {
+                    if (checkUserConsent(user)) {
+                        // User has consent, proceed normally
+                        localStorage.setItem('currentUser', JSON.stringify(user));
+                        if (user.profileCompleted) {
+                            window.location.href = 'home.html';
+                        } else {
+                            window.location.href = 'profile-setup.html';
+                        }
+                    } else {
+                        // User needs to give consent
+                        localStorage.setItem('currentUser', JSON.stringify(user));
+                        showMandatoryConsent(user, false);
+                    }
+                } else {
+                    alert('Invalid username or password');
+                }
+            } else {
+                alert('Please enter both username and password');
+            }
+        });
+
+        // Register form submission
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('register-username').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+            
+            if (username && email && password) {
+                // Check if username already exists
+                const users = JSON.parse(localStorage.getItem('habeshaUsers') || '[]');
+                if (users.find(u => u.username === username)) {
+                    alert('Username already exists');
+                    return;
+                }
+                
+                // Create new user (without consent yet)
+                const newUser = {
+                    id: Date.now(),
+                    username: username,
+                    email: email,
+                    password: password,
+                    profileCompleted: false,
+                    consentGiven: false, // Will be set after consent
+                    privacyAcknowledged: false
+                };
+                
+                // Store user temporarily
+                users.push(newUser);
+                localStorage.setItem('habeshaUsers', JSON.stringify(users));
+                localStorage.setItem('currentUser', JSON.stringify(newUser));
+                
+                // Show mandatory consent modal
+                showMandatoryConsent(newUser, true);
+            } else {
+                alert('Please fill in all fields');
+            }
+        });
+
+        // Check if user is already logged in but missing consent
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser && !checkUserConsent(currentUser)) {
+                // User is logged in but missing consent, show modal
+                showMandatoryConsent(currentUser, false);
+            }
+        });
+    </script>
+</body>
+</html>

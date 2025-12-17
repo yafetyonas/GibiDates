@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GibiDates - Explore</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .like-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .dislike-btn, .like-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dislike-btn {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .dislike-btn:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+        
+        .like-btn {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .like-btn:hover {
+            background: #219a52;
+            transform: scale(1.1);
+        }
+        
+        .match-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .match-notification h3 {
+            color: #27ae60;
+            margin-bottom: 15px;
+        }
+        
+        .match-users {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .match-user {
+            text-align: center;
+        }
+        
+        .match-user img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #27ae60;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        .liked-you-indicator {
+            background: #ffeaa7;
+            color: #e17055;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin: 10px 0;
+            display: inline-block;
+        }
+        
+        .chat-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .chat-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <div class="logo">GibiDates</div>
+            <div class="nav-links">
+                <a href="home.html" class="nav-link">Home</a>
+                <a href="explore.html" class="nav-link active">Explore</a>
+                <a href="category.html" class="nav-link">Category</a>
+                <a href="matches.html" class="nav-link">Matches</a>
+                <a href="chat.html" class="nav-link">Chat</a>
+                <a href="profile.html" class="nav-link">Profile</a>
+                <a href="#" class="nav-link" id="logout-btn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Match Notification -->
+    <div class="overlay" id="overlay"></div>
+    <div class="match-notification" id="match-notification">
+        <h3>🎉 It's a Match!</h3>
+        <div class="match-users">
+            <div class="match-user">
+                <img id="match-user1-img" src="" alt="User 1">
+                <p id="match-user1-name"></p>
+            </div>
+            <div class="match-user">
+                <img id="match-user2-img" src="" alt="User 2">
+                <p id="match-user2-name"></p>
+            </div>
+        </div>
+        <p>You both liked each other! Start a conversation.</p>
+        <button class="btn" onclick="closeMatchNotification()">Continue Exploring</button>
+        <button class="btn chat-btn" onclick="goToChat()">Start Chatting</button>
+    </div>
+
+    <!-- Explore Page Content -->
+    <div class="page-container">
+        <div class="explore-page">
+            <h2>Explore Profiles</h2>
+            <div class="profiles-grid" id="profiles-grid">
+                <!-- Profile cards will be dynamically generated -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize likes and matches data if not exists
+        function initializeData() {
+            if (!localStorage.getItem('habeshaLikes')) {
+                localStorage.setItem('habeshaLikes', JSON.stringify({}));
+            }
+            if (!localStorage.getItem('habeshaMatches')) {
+                localStorage.setItem('habeshaMatches', JSON.stringify({}));
+            }
+            if (!localStorage.getItem('habeshaChats')) {
+                localStorage.setItem('habeshaChats', JSON.stringify({}));
+            }
+        }
+
+        // Check if current user has liked a profile
+        function hasLiked(profileId) {
+            const likes = JSON.parse(localStorage.getItem('habeshaLikes') || '{}');
+            return likes[currentUser.id] && likes[currentUser.id].includes(profileId);
+        }
+
+        function hasLikedYou(profileId) {
+        // Check if profile has liked current user
+            const likes = JSON.parse(localStorage.getItem('habeshaLikes') || '{}');
+            return likes[profileId] && likes[profileId].includes(currentUser.id);
+        }
+
+        // Check if there's a match
+        function isMatch(profileId) {
+            return hasLiked(profileId) && hasLikedYou(profileId);
+        }
+
+        // Like a profile
+        function likeProfile(profileId) {
+            const likes = JSON.parse(localStorage.getItem('habeshaLikes') || '{}');
+            
+            if (!likes[currentUser.id]) {
+                likes[currentUser.id] = [];
+            }
+            
+            // Add to current user's likes if not already there
+            if (!likes[currentUser.id].includes(profileId)) {
+                likes[currentUser.id].push(profileId);
+                localStorage.setItem('habeshaLikes', JSON.stringify(likes));
+                
+                // Check for match
+                if (hasLikedYou(profileId)) {
+                    createMatch(profileId);
+                }
+            }
+            
+            return true;
+        }
+
+        // Dislike/remove like from a profile
+        function dislikeProfile(profileId) {
+            const likes = JSON.parse(localStorage.getItem('habeshaLikes') || '{}');
+            
+            if (likes[currentUser.id]) {
+                const likeIndex = likes[currentUser.id].indexOf(profileId);
+                if (likeIndex > -1) {
+                    likes[currentUser.id].splice(likeIndex, 1);
+                    localStorage.setItem('habeshaLikes', JSON.stringify(likes));
+                    
+                    // Remove match if exists
+                    removeMatch(profileId);
+                }
+            }
+            
+            return true;
+        }
+
+        // Create a match
+        function createMatch(profileId) {
+            const matches = JSON.parse(localStorage.getItem('habeshaMatches') || '{}');
+            const matchId = [currentUser.id, profileId].sort().join('_');
+            
+            if (!matches[matchId]) {
+                matches[matchId] = {
+                    users: [currentUser.id, profileId],
+                    createdAt: new Date().toISOString()
+                };
+                localStorage.setItem('habeshaMatches', JSON.stringify(matches));
+                
+                // Show match notification
+                showMatchNotification(profileId);
+            }
+        }
+
+        // Remove a match
+        function removeMatch(profileId) {
+            const matches = JSON.parse(localStorage.getItem('habeshaMatches') || '{}');
+            const matchId = [currentUser.id, profileId].sort().join('_');
+            
+            if (matches[matchId]) {
+                delete matches[matchId];
+                localStorage.setItem('habeshaMatches', JSON.stringify(matches));
+            }
+        }
+
+        // Show match notification
+        function showMatchNotification(profileId) {
+            const profiles = JSON.parse(localStorage.getItem('habeshaProfiles') || '[]');
+            const matchedProfile = profiles.find(p => p.id === profileId);
+            
+            if (matchedProfile) {
+                document.getElementById('match-user1-img').src = currentUser.photo;
+                document.getElementById('match-user1-name').textContent = currentUser.username;
+                document.getElementById('match-user2-img').src = matchedProfile.photo;
+                document.getElementById('match-user2-name').textContent = matchedProfile.username;
+                
+                document.getElementById('overlay').style.display = 'block';
+                document.getElementById('match-notification').style.display = 'block';
+                
+                // Store the matched profile ID for chat
+                window.lastMatchedProfileId = profileId;
+            }
+        }
+
+        // Close match notification
+        function closeMatchNotification() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('match-notification').style.display = 'none';
+            loadExploreProfiles(); // Reload to update UI
+        }
+
+        // Go to chat with matched user
+        function goToChat() {
+            if (window.lastMatchedProfileId) {
+                // Create chat if it doesn't exist
+                createChat(window.lastMatchedProfileId);
+                window.location.href = `chat.html?user=${window.lastMatchedProfileId}`;
+            } else {
+                window.location.href = 'chat.html';
+            }
+        }
+
+        // Create a chat between two users
+        function createChat(otherUserId) {
+            const chats = JSON.parse(localStorage.getItem('habeshaChats') || '{}');
+            const chatId = [currentUser.id, otherUserId].sort().join('_');
+            
+            if (!chats[chatId]) {
+                chats[chatId] = {
+                    users: [currentUser.id, otherUserId],
+                    messages: [],
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                localStorage.setItem('habeshaChats', JSON.stringify(chats));
+            }
+        }
+
+        // Load profiles for explore page
+        function loadExploreProfiles() {
+            const profilesGrid = document.getElementById('profiles-grid');
+            const allProfiles = JSON.parse(localStorage.getItem('habeshaProfiles') || '[]');
+            
+            profilesGrid.innerHTML = '';
+            
+            // Filter out current user's profile, profiles already matched, and opposite gender
+            const matches = JSON.parse(localStorage.getItem('habeshaMatches') || '{}');
+            const matchedUserIds = Object.values(matches).flatMap(match => match.users);
+            
+            const availableProfiles = allProfiles.filter(profile => 
+                profile.id !== currentUser.id && 
+                !matchedUserIds.includes(profile.id) &&
+                profile.sex !== currentUser.sex // Show only opposite gender
+            );
+            
+            if (availableProfiles.length === 0) {
+                profilesGrid.innerHTML = '<p class="no-profiles">No new profiles to explore. Check your matches!</p>';
+                return;
+            }
+            
+            availableProfiles.forEach(profile => {
+                const profileCard = document.createElement('div');
+                profileCard.className = 'profile-card';
+                const isLiked = hasLiked(profile.id);
+                const likedYou = hasLikedYou(profile.id);
+                
+                profileCard.innerHTML = `
+                    <img src="${profile.photo}" alt="${profile.username}" class="profile-img">
+                    <div class="profile-info">
+                        <h3 class="profile-name">${profile.username}</h3>
+                        <div class="profile-details">
+                            <p>${profile.age} • ${profile.sex} • ${profile.religion}</p>
+                        </div>
+                        <p class="profile-bio">${profile.bio}</p>
+                        <div class="profile-interests">
+                            ${profile.interests.map(interest => 
+                                `<span class="interest-badge">${interest}</span>`
+                            ).join('')}
+                        </div>
+                        ${likedYou ? '<div class="liked-you-indicator">❤️ This profile liked you!</div>' : ''}
+                        <div class="like-actions">
+                            <button class="dislike-btn" data-profile-id="${profile.id}">
+                                <i class='bx bx-x'></i>
+                            </button>
+                            <button class="like-btn" data-profile-id="${profile.id}">
+                                <i class='bx bx-heart'></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                profilesGrid.appendChild(profileCard);
+            });
+
+            // Add event listeners to like/dislike buttons
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const profileId = parseInt(this.dataset.profileId);
+                    likeProfile(profileId);
+                    this.closest('.profile-card').style.display = 'none';
+                    
+                    // Check if there are more profiles
+                    const remainingProfiles = document.querySelectorAll('.profile-card:not([style*="display: none"])');
+                    if (remainingProfiles.length === 0) {
+                        loadExploreProfiles();
+                    }
+                });
+            });
+
+            document.querySelectorAll('.dislike-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const profileId = parseInt(this.dataset.profileId);
+                    dislikeProfile(profileId);
+                    this.closest('.profile-card').style.display = 'none';
+                    
+                    // Check if there are more profiles
+                    const remainingProfiles = document.querySelectorAll('.profile-card:not([style*="display: none"])');
+                    if (remainingProfiles.length === 0) {
+                        loadExploreProfiles();
+                    }
+                });
+            });
+        }
+
+        // Logout functionality
+        document.getElementById('logout-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        });
+
+        // Initialize and load profiles on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeData();
+            loadExploreProfiles();
+        });
+    </script>
+</body>
+</html>

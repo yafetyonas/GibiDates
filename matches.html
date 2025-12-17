@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GibiDates - Matches</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .matches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .match-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease;
+        }
+        
+        .match-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .match-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 15px;
+            border: 3px solid #27ae60;
+        }
+        
+        .match-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .match-details {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .match-date {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 15px;
+        }
+        
+        .no-matches {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            font-size: 18px;
+        }
+        
+        .match-badge {
+            background: #27ae60;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <div class="logo">GibiDates</div>
+            <div class="nav-links">
+                 <a href="home.html" class="nav-link">Home</a>
+                <a href="explore.html" class="nav-link">Explore</a>
+                <a href="category.html" class="nav-link">Category</a>
+                <a href="matches.html" class="nav-link active">Matches</a>
+                <a href="chat.html" class="nav-link">Chat</a>
+                <a href="profile.html" class="nav-link">Profile</a>
+                <a href="#" class="nav-link" id="logout-btn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Matches Page Content -->
+    <div class="page-container">
+        <div class="explore-page">
+            <h2>Your Matches</h2>
+            <div class="matches-grid" id="matches-grid">
+                <!-- Matches will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            window.location.href = 'index.html';
+        }
+
+        // Load user's matches
+        function loadMatches() {
+            const matchesGrid = document.getElementById('matches-grid');
+            const allProfiles = JSON.parse(localStorage.getItem('habeshaProfiles') || '[]');
+            const matches = JSON.parse(localStorage.getItem('habeshaMatches') || '{}');
+            
+            matchesGrid.innerHTML = '';
+            
+            // Get current user's matches
+            const userMatches = Object.values(matches).filter(match => 
+                match.users.includes(currentUser.id)
+            );
+            
+            if (userMatches.length === 0) {
+                matchesGrid.innerHTML = `
+                    <div class="no-matches">
+                        <p>No matches yet! Start exploring profiles to find your match.</p>
+                        <a href="explore.html" class="btn" style="margin-top: 20px; display: inline-block;">Start Exploring</a>
+                    </div>
+                `;
+                return;
+            }
+            
+            userMatches.forEach(match => {
+                // Find the other user in the match
+                const otherUserId = match.users.find(id => id !== currentUser.id);
+                const matchedProfile = allProfiles.find(profile => profile.id === otherUserId);
+                
+                if (matchedProfile) {
+                    const matchCard = document.createElement('div');
+                    matchCard.className = 'match-card';
+                    
+                    matchCard.innerHTML = `
+                        <div class="match-badge">MATCH</div>
+                        <img src="${matchedProfile.photo}" alt="${matchedProfile.username}" class="match-photo">
+                        <div class="match-name">${matchedProfile.username}</div>
+                        <div class="match-details">${matchedProfile.age} • ${matchedProfile.sex} • ${matchedProfile.religion}</div>
+                        <div class="match-interests">
+                            ${matchedProfile.interests.slice(0, 3).map(interest => 
+                                `<span class="interest-badge">${interest}</span>`
+                            ).join('')}
+                        </div>
+                        <div class="match-date">Matched on ${new Date(match.createdAt).toLocaleDateString()}</div>
+                        <button class="btn" onclick="viewProfile(${matchedProfile.id})">View Profile</button>
+                    `;
+                    
+                    matchesGrid.appendChild(matchCard);
+                }
+            });
+        }
+
+        // View matched profile (could be expanded to messaging)
+        function viewProfile(profileId) {
+            // For now, just show an alert. This could be expanded to a chat system.
+            const profiles = JSON.parse(localStorage.getItem('habeshaProfiles') || '[]');
+            const profile = profiles.find(p => p.id === profileId);
+            if (profile) {
+                alert(`Viewing ${profile.username}'s profile\n\nThis could open a chat interface or detailed profile view.`);
+            }
+        }
+
+        // Logout functionality
+        document.getElementById('logout-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        });
+
+        // Load matches on page load
+        document.addEventListener('DOMContentLoaded', loadMatches);
+    </script>
+</body>
+</html>
